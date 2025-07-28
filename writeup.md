@@ -1,202 +1,322 @@
-# OverTheWire: Bandit Write-up (Levels 0-20)
+# OverTheWire: Bandit Walkthrough (Level 0 to Level 20)
 
-> **Purpose**: This write-up covers Bandit levels 0–20 from OverTheWire with detailed explanations for every command used. Ideal for beginners learning Linux, SSH, and basic security concepts.
+This is a detailed walkthrough for the Bandit Wargame hosted on OverTheWire. It is aimed at absolute beginners and includes explanation for every command used.
 
 ---
 
-## ⚔️ Level 0 → 1
-**Command:**
+## Level 0 → Level 1
+
+**Objective**: SSH into the machine using the given credentials and find the password for the next level.
+
+**Credentials**:
+- **Username**: `bandit0`
+- **Password**: `bandit0`
+- **Host**: `bandit.labs.overthewire.org`
+- **Port**: `2220`
+
+**Command**:
 ```bash
 ssh bandit0@bandit.labs.overthewire.org -p 2220
 ```
-**Explanation:** Securely connects to the remote machine using SSH as `bandit0` user on port `2220`.
 
+This connects to the Bandit server using SSH with the username `bandit0` and port `2220`.
+
+Once logged in, list files:
 ```bash
 ls
+```
+
+You'll see a file called `README`. Display its content:
+```bash
 cat README
 ```
-- Lists files and prints the content of `README`, which contains the password.
+
+This file contains the password for the next level.
 
 ---
 
-## 🧾 Level 1 → 2
+## Level 1 → Level 2
+
+**Objective**: Read the contents of a file with a tricky filename: `-`
+
+List the files:
 ```bash
 ls
+```
+
+Use `cat` with a relative path to avoid confusion with `-`:
+```bash
 cat ./-
 ```
-- The filename is `-`. We use `./` to reference it as a regular file.
+
+This outputs the password for Level 2.
 
 ---
 
-## 📁 Level 2 → 3
+## Level 2 → Level 3
+
+**Objective**: Read a file with spaces in its filename.
+
+List the files:
 ```bash
 ls
+```
+
+You’ll see a file named `spaces in this filename`. Enclose it in quotes:
+```bash
 cat "spaces in this filename"
 ```
-- Quotes are used to handle filenames with spaces.
 
 ---
 
-## 🔍 Level 3 → 4
+## Level 3 → Level 4
+
+**Objective**: Find and read a hidden file.
+
+List the contents:
+```bash
+ls
+```
+
+Enter the `inhere` directory:
 ```bash
 cd inhere
+```
+
+List all files including hidden ones:
+```bash
 ls -la
+```
+
+Display contents of the hidden file:
+```bash
 cat .hidden
 ```
-- Navigates to `inhere`, lists all files including hidden ones, and reads `.hidden`.
 
 ---
 
-## 🧱 Level 4 → 5
+## Level 4 → Level 5
+
+**Objective**: Read a human-readable file from a group of files.
+
+Navigate and list files:
 ```bash
 cd inhere
+ls
+```
+
+Find the readable ASCII file. Use:
+```bash
 cat ./-file07
 ```
-- File name starts with `-`, so we prefix with `./` to read it.
 
 ---
 
-## 🧩 Level 5 → 6
+## Level 5 → Level 6
+
+**Objective**: Find a file with a specific size (1033 bytes) and not executable.
+
+Commands:
 ```bash
 cd inhere
 find . -size 1033c ! -executable
 cat ./maybehere07/.file2
 ```
-- Finds a 1033-byte non-executable file and reads it.
+
+- `find` searches for files of exact size (`1033c` = 1033 bytes) and not executable.
+- `cat` reads the file with the password.
 
 ---
 
-## 🕵️ Level 6 → 7
+## Level 6 → Level 7
+
+**Objective**: Find a file owned by `bandit7`, group `bandit6`, and of size 33 bytes anywhere on the system.
+
+Command:
 ```bash
 find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null
-cat /path/to/file
 ```
-- Searches from root for file owned by `bandit7`, group `bandit6`, 33 bytes in size.
+
+- `-type f`: look for files
+- `-user bandit7`: owned by user
+- `-group bandit6`: owned by group
+- `-size 33c`: size is 33 bytes
+- `2>/dev/null`: suppress permission errors
+
+Read the file once found:
+```bash
+cat /path/to/found/file
+```
 
 ---
 
-## 📄 Level 7 → 8
+## Level 7 → Level 8
+
+**Objective**: Find a line containing the word "millionth".
+
 ```bash
 cat data.txt | grep millionth
 ```
-- Prints the line containing `millionth`.
 
 ---
 
-## 🔍 Level 8 → 9
+## Level 8 → Level 9
+
+**Objective**: Find the unique line that appears only once.
+
 ```bash
 cat data.txt | sort | uniq -u
 ```
-- Sorts and finds unique line (appears once only).
+
+- `sort` organizes lines
+- `uniq -u` filters lines that appear only once
 
 ---
 
-## 🧪 Level 9 → 10
+## Level 9 → Level 10
+
+**Objective**: Find lines that contain the equal sign `=`.
+
 ```bash
-cat data.txt | strings | grep "=="
+cat data.txt | grep "="
 ```
-- `strings` filters printable characters; `grep` finds Base64 pattern.
 
 ---
 
-## 🔐 Level 10 → 11
+## Level 10 → Level 11
+
+**Objective**: Decode base64 encoded text.
+
 ```bash
 base64 -d data.txt
 ```
-- Decodes a Base64-encoded file.
+
+- `-d`: decode the content
 
 ---
 
-## 🔄 Level 11 → 12
+## Level 11 → Level 12
+
+**Objective**: Decode a ROT13 cipher.
+
 ```bash
 cat data.txt | tr 'A-Za-z' 'N-ZA-Mn-za-m'
 ```
-- Decodes ROT13 (shifts each letter by 13).
+
+- `tr`: translate characters
+- This shifts each letter by 13 places
 
 ---
 
-## 📦 Level 12 → 13
+## Level 12 → Level 13
+
+**Objective**: Extract the password hidden in a multi-level compressed file.
+
 ```bash
+mkdir /tmp/bandana
+cp data.txt /tmp/bandana
+cd /tmp/bandana
 xxd -r data.txt > bandit
+file bandit
 mv bandit bandit.gz
 gunzip bandit.gz
+file bandit
 bzip2 -d bandit
+file bandit.out
 mv bandit.out bandit.gz
 gunzip bandit.gz
+file bandit
 tar xvf bandit
+file data5.bin
 tar xvf data5.bin
+file data6.bin
 bzip2 -d data6.bin
+file data6.bin.out
 tar xvf data6.bin.out
+file data8.bin
 mv data8.bin data8.gz
 gunzip data8.gz
+file data8
 cat data8
 ```
-- Multiple steps to decode/decompress layers and extract password.
 
 ---
 
-## 🔑 Level 13 → 14
+## Level 13 → Level 14
+
+**Objective**: Use an SSH private key to login.
+
+Download and save the private key, then run:
 ```bash
 chmod 600 sshkey.private
 ssh -i sshkey.private bandit14@bandit.labs.overthewire.org -p 2220
 ```
-- Uses private key for SSH authentication.
 
 ---
 
-## 🌐 Level 14 → 15
+## Level 14 → Level 15
+
+**Objective**: Submit the password via netcat to a local service.
+
 ```bash
-echo [password] | nc localhost 30000
+echo <password> | nc localhost 30000
 ```
-- Sends password to a TCP service using Netcat.
 
 ---
 
-## 📶 Level 15 → 16
+## Level 15 → Level 16
+
+**Objective**: Connect to an SSL port and submit the password.
+
 ```bash
 openssl s_client -connect localhost:30001 -quiet < /etc/bandit_pass/bandit15
 ```
-- Sends password over SSL connection using `openssl`.
 
 ---
 
-## 🛠️ Level 16 → 17
+## Level 16 → Level 17
+
+**Objective**: Port scan and use correct one to fetch private key.
+
 ```bash
 nmap -p 31000-32000 localhost
+cat /etc/bandit_pass/bandit16 | openssl s_client -connect localhost:<correct_port> -quiet > /tmp/key/akey
+chmod 600 /tmp/key/akey
+ssh -i /tmp/key/akey bandit17@localhost -p 2220
 ```
-- Scans ports to find the one with the service.
-
-```bash
-cat /etc/bandit_pass/bandit16 | openssl s_client -connect localhost:31790 -quiet > /tmp/key
-chmod 600 /tmp/key
-ssh -i /tmp/key bandit17@localhost
-```
-- Sends password, receives key, logs into next level.
 
 ---
 
-## 🧾 Level 17 → 18
+## Level 17 → Level 18
+
+**Objective**: Compare two files.
+
 ```bash
+ls -la
 diff passwords.old passwords.new
 ```
-- Compares files to find modified line (new password).
 
 ---
 
-## ⚡ Level 18 → 19
+## Level 18 → Level 19
+
+**Objective**: Display file content before session closes.
+
 ```bash
 ssh bandit18@bandit.labs.overthewire.org -p 2220 cat readme
 ```
-- Reads `readme` directly during login because normal shell logs out.
 
 ---
 
-## 🔧 Level 19 → 20
+## Level 19 → Level 20
+
+**Objective**: Run a program as another user using setuid.
+
 ```bash
 ./bandit20-do cat /etc/bandit_pass/bandit20
 ```
-- Executes command as bandit20 via setuid binary.
 
 ---
 
-> **Next:** Want the next levels (21–34) or gamified One Piece-style progression? Let me know!
+✅ **Completed: Bandit Levels 0–20**
+
